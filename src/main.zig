@@ -1,5 +1,6 @@
-const std = @import("std");
-const builtin = @import("builtin");
+const terminal = @import("terminal/terminal.zig");
+
+const Terminal = terminal.Terminal;
 
 // We need to define a `MultiBootHeader` struct following the pattern from
 // Header Magic Fields config, we need 3 fields:
@@ -41,5 +42,8 @@ export var multiboot align(4) linksection(".multiboot") = MultiBootHeader{
 // * `noreturn` is a special keyword which states that function does not
 // return at all (every entry point to the OS is like that).
 export fn _start() callconv(.Naked) noreturn {
+
+    // TODO: Figure out a way to make a runtime call here.
+
     while (true) {}
 }
