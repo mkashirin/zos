@@ -1,4 +1,4 @@
-const terminal = @import("terminal/terminal.zig");
+const terminal = @import("terminal.zig");
 
 const Terminal = terminal.Terminal;
 
