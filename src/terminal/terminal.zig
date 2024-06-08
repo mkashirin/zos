@@ -78,7 +78,7 @@ pub const Terminal = struct {
     ) void {
         const index = h * vga.width + w;
 
-        // Here we are actually writing to the screen-output buffer.
+        // Here we are actually writing to the screen output buffer.
         self.buffer[index] = vga.entry(char, new_color);
     }
 
