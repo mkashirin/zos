@@ -22,6 +22,9 @@ const MEMINFO = 1 << 1;
 const FLAGS = ALIGN | MEMINFO;
 const MAGIC = 0x1BADB002;
 
+// Stack pointer.
+var stack: [*]usize = undefined;
+
 // There're 3 important notations for the `multiboot`:
 // * `export` makes a function or variable externally visible in the
 // generated object file;
@@ -42,8 +45,19 @@ export var multiboot align(4) linksection(".multiboot") = MultiBootHeader{
 // * `noreturn` is a special keyword which states that function does not
 // return at all (every entry point to the OS is like that).
 export fn _start() callconv(.Naked) noreturn {
+    asm volatile (
+        \\ movl %[stk], %esp
+        \\ movl %esp, %ebp
+        :
+        : [stk] "{ecx}" (@intFromPtr(&stack) + @sizeOf(@TypeOf(stack))),
+    );
 
-    // TODO: Figure out a way to make a runtime call here.
+    // TODO: Figure out a way to make a runtime call to `putHello()`.
 
     while (true) {}
+}
+
+fn putHello() void {
+    var term = Terminal.init();
+    term.write("Hello, World!");
 }
