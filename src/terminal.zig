@@ -1,3 +1,5 @@
+const std = @import("std");
+
 // Since we're using 16-bit terminal, 16 colors needed.
 const Color = enum(u8) {
     black,
@@ -18,7 +20,7 @@ const Color = enum(u8) {
     white,
 };
 const WIDTH = 80;
-const HEIGHT = 45;
+const HEIGHT = 25;
 
 // Foreground | background color.
 fn vgaEntryColor(foreground: Color, background: Color) u8 {
@@ -79,13 +81,20 @@ pub const Terminal = struct {
 
     // Put character and change the cursor postition.
     fn putChar(self: *Self, char: u8) void {
-        self.putCharAt(char, self.color, self.column, self.row);
-        self.column += 1;
-        if (self.column == WIDTH) {
+        if (char == '\n') {
             self.column = 0;
             self.row += 1;
             if (self.row == HEIGHT)
                 self.row = 0;
+        } else {
+            self.putCharAt(char, self.color, self.column, self.row);
+            self.column += 1;
+            if (self.column == WIDTH) {
+                self.column = 0;
+                self.row += 1;
+                if (self.row == HEIGHT)
+                    self.row = 0;
+            }
         }
     }
 
