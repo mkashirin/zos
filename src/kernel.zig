@@ -58,5 +58,5 @@ export fn _callMain() void {
 
 // Regular main function here.
 pub fn main() void {
-    io.put_char('A', 0);
+    io.put_char('A', 10);
 }

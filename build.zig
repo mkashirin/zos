@@ -20,18 +20,31 @@ pub fn build(b: *std.Build) void {
     // how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable(.{
+    const kernel = b.addExecutable(.{
         .name = "zos",
-        .root_source_file = b.path("src/main.zig"),
+        .root_source_file = b.path("src/kernel.zig"),
         .target = b.resolveTargetQuery(target),
         .optimize = optimize,
     });
-
     // Since we have no OS, we need to provide a path to the linker script, so
     // that our files are linked properly.
-    exe.setLinkerScriptPath(b.path("src/linker.ld"));
+    kernel.setLinkerScriptPath(b.path("src/linker.ld"));
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
-    b.installArtifact(exe);
+    b.installArtifact(kernel);
+
+    // When the kernel is compiled, we can run QEMU directly from the build
+    // script! Path to the kernel is required to be passed to the `-kernel`
+    // flag ro run it.
+    const run_qemu = b.addSystemCommand(&[_][]const u8{
+        "qemu-system-x86_64",
+        "-kernel",
+        "./zig-out/bin/zos",
+    });
+    // Then we make the run step depend on the kernel compilation step for
+    // obvious reasons.
+    run_qemu.step.dependOn(&kernel.step);
+    const run_kernel = b.step("run", "Run the kernel");
+    run_kernel.dependOn(&run_qemu.step);
 }
