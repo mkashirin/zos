@@ -1,3 +1,5 @@
+const io = @import("io.zig");
+
 // We need to define a `MultiBootHeader` struct following the pattern from
 // Header Magic Fields config, we need 3 fields:
 // * `magic: i32` is the magic number identifying the header, which must
@@ -41,10 +43,7 @@ export fn _start() callconv(.Naked) noreturn {
     // Inline volatile Assembly must be involved to call the exported
     // function, which would serve as a gateway to the runtime. Since it
     // is exported, we can just call it directly.
-    asm volatile (
-        \\ call _callMain
-        \\ ret
-    );
+    asm volatile ("call _callMain");
 
     // Then the spin is acquired, even though it is not neccessary and `void`
     // can still be used as a return type for this `_start()` function.
@@ -54,10 +53,10 @@ export fn _start() callconv(.Naked) noreturn {
 // This function gets called by `_start()` to provide a gateway to the runtime.
 export fn _callMain() void {
     // From now on, we can make runtime calls to the regular functions.
-    _ = @call(.auto, main, .{ 2, 2 });
+    @call(.auto, main, .{});
 }
 
 // Regular main function here.
-pub fn main(a: i32, b: i32) i32 {
-    return a + b;
+pub fn main() void {
+    io.put_char('A', 0);
 }
