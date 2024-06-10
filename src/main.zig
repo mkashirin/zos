@@ -1,7 +1,3 @@
-const terminal = @import("terminal.zig");
-
-const Terminal = terminal.Terminal;
-
 // We need to define a `MultiBootHeader` struct following the pattern from
 // Header Magic Fields config, we need 3 fields:
 // * `magic: i32` is the magic number identifying the header, which must
@@ -42,20 +38,26 @@ export var multiboot align(4) linksection(".multiboot") = MultiBootHeader{
 // * `noreturn` is a special keyword which states that function does not
 // return at all (every entry point to the OS is like that).
 export fn _start() callconv(.Naked) noreturn {
-    // asm volatile (
-    //     \\ call *%[func_ptr]
-    //     \\ ret
-    //     :
-    //     : [func_ptr] "r" (&putHello),
-    //     : "memory"
-    // );
+    // Inline volatile Assembly must be involved to call the exported
+    // function, which would serve as a gateway to the runtime. Since it
+    // is exported, we can just call it directly.
+    asm volatile (
+        \\ call _callMain
+        \\ ret
+    );
 
-    // TODO: Figure out a way to make a runtime call to `putHello()`.
-
+    // Then the spin is acquired, even though it is not neccessary and `void`
+    // can still be used as a return type for this `_start()` function.
     while (true) {}
 }
 
-fn putHello() callconv(.C) void {
-    var term = Terminal.init();
-    term.write("Hello, World!");
+// This function gets called by `_start()` to provide a gateway to the runtime.
+export fn _callMain() void {
+    // From now on, we can make runtime calls to the regular functions.
+    _ = @call(.auto, main, .{ 2, 2 });
+}
+
+// Regular main function here.
+pub fn main(a: i32, b: i32) i32 {
+    return a + b;
 }
