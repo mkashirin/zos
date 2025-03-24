@@ -1,7 +1,5 @@
 const std = @import("std");
-
-const Target = std.Target;
-const CrossTarget = std.zig.CrossTarget;
+const zig = std.zig;
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
@@ -9,7 +7,7 @@ const CrossTarget = std.zig.CrossTarget;
 pub fn build(b: *std.Build) void {
     // Here we set the target to be an x86 bare metal chip without any OS.
     // This allows for our program to be run as a freestanding binary.
-    const target: CrossTarget = .{
+    const target: zig.CrossTarget = .{
         .cpu_arch = .x86,
         .os_tag = .freestanding,
     };
@@ -37,7 +35,7 @@ pub fn build(b: *std.Build) void {
     // When the kernel is compiled, we can run QEMU directly from the build
     // script! Path to the kernel is required to be passed to the `-kernel`
     // flag ro run it.
-    const run_qemu = b.addSystemCommand(&[_][]const u8{
+    const run_qemu = b.addSystemCommand(&[3][]const u8{
         "qemu-system-x86_64",
         "-kernel",
         "./zig-out/bin/zos",
