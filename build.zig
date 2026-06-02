@@ -1,5 +1,4 @@
 const std = @import("std");
-const zig = std.zig;
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
@@ -7,26 +6,27 @@ const zig = std.zig;
 pub fn build(b: *std.Build) void {
     // Here we set the target to be an x86 bare metal chip without any OS.
     // This allows for our program to be run as a freestanding binary.
-    const target: zig.CrossTarget = .{
+    const target = b.resolveTargetQuery(.{
         .cpu_arch = .x86,
         .os_tag = .freestanding,
-    };
-
-    // Standard optimization options allow the person running `zig build` to
-    // select between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here
-    // we do not set a preferred release mode, allowing the user to decide
-    // how to optimize.
-    const optimize = b.standardOptimizeOption(.{});
-
-    const kernel = b.addExecutable(.{
-        .name = "zos",
-        .root_source_file = b.path("src/kernel.zig"),
-        .target = b.resolveTargetQuery(target),
-        .optimize = optimize,
     });
+
+    const kernel_module = b.createModule(.{
+        .root_source_file = b.path("src/kernel.zig"),
+        .target = target,
+        .optimize = .ReleaseSmall,
+        .unwind_tables = .none,
+        .single_threaded = true,
+        .strip = true,
+    });
+    const kernel = b.addExecutable(.{
+        .name = "kernel",
+        .root_module = kernel_module,
+    });
+    kernel.out_filename = "kernel.elf";
     // Since we have no OS, we need to provide a path to the linker script, so
     // that our files are linked properly.
-    kernel.setLinkerScriptPath(b.path("src/linker.ld"));
+    kernel.setLinkerScript(b.path("src/linker.ld"));
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
@@ -38,7 +38,7 @@ pub fn build(b: *std.Build) void {
     const run_qemu = b.addSystemCommand(&[3][]const u8{
         "qemu-system-x86_64",
         "-kernel",
-        "./zig-out/bin/zos",
+        "./zig-out/bin/kernel.elf",
     });
     // Then we make the run step depend on the kernel compilation step for
     // obvious reasons.

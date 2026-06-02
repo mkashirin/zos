@@ -27,7 +27,7 @@ const MAGIC = 0x1BADB002;
 // stored to memory, the memory address must be evenly divisible by 4;
 // * `linksection(".multiboot")` basically links the `multiboot` variable
 // with the `.multiboot` section in the linker script.
-export var multiboot align(4) linksection(".multiboot") = MultiBootHeader{
+export var multiboot: MultiBootHeader align(4) linksection(".multiboot") = .{
     .magic = MAGIC,
     .flags = FLAGS,
     .checksum = -(MAGIC + FLAGS),
@@ -35,11 +35,11 @@ export var multiboot align(4) linksection(".multiboot") = MultiBootHeader{
 
 // Now when the multiboot is set up, it is time to define an entry point
 // (`_start`) to our kernel:
-// * `callconv(.Naked)` changes the calling convention of the function to
-// `.Naked` so that it can be run on bare metal;
+// * `callconv(.naked)` changes the calling convention of the function to
+// `.naked` so that it can be run on bare metal;
 // * `noreturn` is a special keyword which states that function does not
 // return at all (every entry point to the OS is like that).
-export fn _start() callconv(.Naked) noreturn {
+export fn _start() callconv(.naked) noreturn {
     // Inline volatile Assembly must be involved to call the exported
     // function, which would serve as a gateway to the runtime. Since it
     // is exported, we can just call it directly.
