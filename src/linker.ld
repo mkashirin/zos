@@ -25,19 +25,21 @@ ENTRY(_start)
         */
         . = 1M;
 
-        /* 
-        Here we define sections with `.* : ALIGN(E)` syntax.
-        `ALIGN(E)` returns the result of the current location counter (`.`)
-        aligned to the next `E` boundary. (`E` stands for expression.)
-        */
-        .text : ALIGN(4K) {
-
+        .multiboot : {
             /*
             This marks a section that should NOT be eliminated.
             You can also name one or more sections from your input files, for
             insertion in the current output section with `*(E)` syntax.
             */
             KEEP(*(.multiboot))
+        }
+
+        /* 
+        Here we define sections with `.* : ALIGN(E)` syntax.
+        `ALIGN(E)` returns the result of the current location counter (`.`)
+        aligned to the next `E` boundary. (`E` stands for expression.)
+        */
+        .text : ALIGN(4K) {
             *(.text)
         }
 

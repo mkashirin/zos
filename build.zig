@@ -9,13 +9,15 @@ pub fn build(b: *std.Build) void {
     const target = b.resolveTargetQuery(.{
         .cpu_arch = .x86,
         .os_tag = .freestanding,
+        .abi = .none,
     });
 
     const kernel_module = b.createModule(.{
         .root_source_file = b.path("src/kernel.zig"),
         .target = target,
         .optimize = .ReleaseSmall,
-        .unwind_tables = .none,
+        .code_model = .kernel,
+        .error_tracing = false,
         .single_threaded = true,
         .strip = true,
     });
@@ -35,7 +37,7 @@ pub fn build(b: *std.Build) void {
     // When the kernel is compiled, we can run QEMU directly from the build
     // script! Path to the kernel is required to be passed to the `-kernel`
     // flag ro run it.
-    const run_qemu = b.addSystemCommand(&[3][]const u8{
+    const run_qemu = b.addSystemCommand(&.{
         "qemu-system-x86_64",
         "-kernel",
         "./zig-out/bin/kernel.elf",
