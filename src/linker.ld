@@ -17,6 +17,7 @@ ENTRY(_start)
 
     Here we're doing the third thing.
     */
+
     SECTIONS {
 
         /*
@@ -25,34 +26,21 @@ ENTRY(_start)
         */
         . = 1M;
 
-        .multiboot : {
-            /*
-            This marks a section that should NOT be eliminated.
-            You can also name one or more sections from your input files, for
-            insertion in the current output section with `*(E)` syntax.
-            */
-            KEEP(*(.multiboot))
-        }
+        /*
+        This marks a section that should NOT be eliminated.
+        You can also name one or more sections from your input files, for
+        insertion in the current output section with `*(E)` syntax.
+        */
+        .multiboot : { KEEP(*(.multiboot)) }
 
         /* 
         Here we define sections with `.* : ALIGN(E)` syntax.
         `ALIGN(E)` returns the result of the current location counter (`.`)
         aligned to the next `E` boundary. (`E` stands for expression.)
         */
-        .text : ALIGN(4K) {
-            *(.text)
-        }
+        .text : ALIGN(4K) { *(.text) }
 
-        .rodata : ALIGN(4K) {
-            *(.rodata)
-        }
-
-        .data : ALIGN(4K) {
-            *(.data)
-        }
-
-        .bss : ALIGN(4K) {
-            *(COMMON)
-            *(.bss)
-        }
+        .rodata : ALIGN(4K) { *(.rodata) }
+        .data : ALIGN(4K) { *(.data) }
+        .bss : ALIGN(4K) { *(COMMON) *(.bss) }
 }
